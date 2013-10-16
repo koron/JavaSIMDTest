@@ -1,4 +1,4 @@
-# Java SIMD tests
+# Java SIMD test
 
 Java で簡単なベクトルの足し算に SSE が適用されるかどうか検証してみた。
 結果、されてないっぽい。もしくは UseSSE が機能してないのか。
