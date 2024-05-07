@@ -14,6 +14,10 @@ Java 21 では UseSuperWord を使うことで
 両セットの n 番目のベクトル同士を足し算するのを、5秒間繰り返す。
 1秒あたりに足せた回数を指標とする。
 
+そもそもテスト内容自体、メモリの読み書きの要素が強く計算の要素が弱い。
+SIMDのパワーを見せるという観点では迫力に欠ける。
+しかしJavaにおいてSIMDが機能していることは確認できる。
+
 ## OpenJDK 21
 
 JDK 1.7のときとは実行しているPC構成が変わってることに留意が必要。
@@ -41,9 +45,9 @@ Wait 5.0 seconds
 
 上に示した通り `-XX:-UseSuperWord` を付けて実行した際に約40%低下している。
 これは SIMD を利用していないことにより引き起こされた速度低下だと考えられる。
-即ちデフォルトでSIMDを利用している。
+即ちJava 21はデフォルトでSIMDを利用した最適化を行っている。
 
-### Java公式ドキュメントより引用
+### Java 公式ドキュメントより引用
 
 <https://docs.oracle.com/javase/jp/21/docs/specs/man/java.html>
 
@@ -56,11 +60,15 @@ Wait 5.0 seconds
 > -XX:+UseSuperWord
 >    スカラー操作のスーパーワード操作への変換を有効にします。 スーパーワードとは、ベクトル化最適化です。 このオプションはデフォルトでは有効になります。 スカラー操作のスーパーワード操作への変換を無効にするには、-XX:-UseSuperWordを指定します。
 
+[Java 7](https://docs.oracle.com/javase/jp/7/technotes/tools/windows/java.html)のドキュメントにはUseSSEもUseSuperWordも存在しなかった。
+
+[Java 8](https://docs.oracle.com/javase/jp/8/docs/technotes/tools/windows/java.html) のドキュメントには UseSuperWord が存在した。
+
 ## JDK 1.7
 
 ### Usage
 
-```
+```console
 $ java -version
 java version "1.7.0_45"
 Java(TM) SE Runtime Environment (build 1.7.0_45-b18)
