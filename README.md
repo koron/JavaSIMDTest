@@ -64,6 +64,49 @@ Wait 5.0 seconds
 
 [Java 8](https://docs.oracle.com/javase/jp/8/docs/technotes/tools/windows/java.html) のドキュメントには UseSuperWord が存在した。
 
+## 距離関数を実装し比較してみた
+
+L2、コサイン、内積(Dot-Product)の4つの距離関数を、
+SIMDを使ってと使わないで実装して速度を比較する。
+
+以下がその結果。
+コサイン距離を除いてSIMDが2倍以上、3倍未満のパフォーマンスが出ている。
+コサイン距離においてSIMDの伸びが悪い理由は不明。
+しかし同時に3つの変数の集約を行っているので、
+SIMDレジスタに収まっていない可能性が考えられる。
+
+```console
+$ make benchmark-distance
+java --add-modules jdk.incubator.vector DistanceBenchmark
+WARNING: Using incubator modules: jdk.incubator.vector
+Type    Method  Dur(ms) Check
+NORMAL  L2      3403    3.63823e+07
+SIMD    L2      1408    3.63823e+07
+NORMAL  COS     4147    1.50109e+06
+SIMD    COS     3044    1.50109e+06
+NORMAL  DP      3431    1.01050e+09
+SIMD    DP      1260    1.01050e+09
+```
+
+実行時に `-XX:-UseSuperWord` を指定してSIMDを無効化して再計測。
+ほぼSIMD有効化時と一緒なのだが非SIMD実装のコサイン距離が、
+SIMD有効化時より約1割パフォーマンスが向上している。
+原因は不明だが、SIMDとのやり取りにかかるオーバーヘッドがなくなったから、
+という解釈は考えられる。
+
+```console
+$ make benchmark-distance-nosimd
+java -XX:-UseSuperWord --add-modules jdk.incubator.vector DistanceBenchmark
+WARNING: Using incubator modules: jdk.incubator.vector
+Type    Method  Dur(ms) Check
+NORMAL  L2      3531    3.63861e+07
+SIMD    L2      1424    3.63861e+07
+NORMAL  COS     3656    1.50122e+06
+SIMD    COS     3030    1.50122e+06
+NORMAL  DP      3510    1.01155e+09
+SIMD    DP      1299    1.01155e+09
+```
+
 ## JDK 1.7
 
 ### Usage
